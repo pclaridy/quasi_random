@@ -14,7 +14,7 @@
 ---
 
 ## **1. Problem Statement**  
-This project explores how quasi-random sequences compare to traditional pseudo-random sequences in Monte Carlo integration tasks. The focus is on evaluating how well each sequence type covers a 2D unit hypercube and how that impacts integration accuracy and variance. The goal is to provide insight into which sampling method is more effective for numerical simulations, especially those used in scientific and engineering applications.
+Accurate numerical integration is essential in many scientific and engineering simulations, where the quality of sampling can significantly impact results. This project evaluates how quasi-random sequences such as Sobol, Halton, and Faure compare to traditional pseudo-random sequences in Monte Carlo integration tasks. The analysis focuses on how well each sequence type covers a two-dimensional unit hypercube and how this affects the variance and accuracy of integration estimates. The goal is to provide practical insight into which sampling method offers more consistent performance for simulation workflows that rely on uniform and efficient coverage of input space.
 
 ---
 
