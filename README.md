@@ -1,112 +1,133 @@
-# Comparison of Quasi-Random Sequences and Pseudo-Random Sequences for Monte Carlo Integration
+# **Low-Discrepancy Sequences in Action: A Monte Carlo Comparison of Quasi-Random vs. Pseudo-Random Sampling**
 
-## Introduction
+## **Table of Contents**
+1. [Problem Statement](#1-problem-statement)  
+2. [Data Source](#2-data-source)  
+3. [Data Cleaning & Preprocessing](#3-data-cleaning--preprocessing)  
+4. [Exploratory Data Analysis (EDA)](#4-exploratory-data-analysis-eda)  
+5. [Modeling Approach](#5-modeling-approach)  
+6. [Evaluation Metrics](#6-evaluation-metrics)  
+7. [Outcome](#7-outcome)  
+8. [Tools Used](#8-tools-used)  
+9. [Business Impact / Use Case](#9-business-impact--use-case)
 
-In various scientific and engineering applications, such as numerical integration, computer graphics, and financial modeling, the generation of random or quasi-random points within a unit hypercube is essential for simulations and modeling. Traditional pseudo-random number generators produce sequences that can lead to clustering and gaps, resulting in higher variance and less reliable results in these simulations. This discrepancy becomes particularly significant in Monte Carlo integration tasks, where the goal is to approximate integrals using random sampling.
+---
 
-Quasi-random sequences, also known as low-discrepancy sequences, offer a promising alternative. These sequences are designed to cover the sampling space more uniformly, potentially reducing the variance and increasing the accuracy of numerical simulations. Among the various quasi-random sequences, Sobol, Halton, and Faure sequences are well-known for their effectiveness.
+## **1. Problem Statement**  
+This project explores how quasi-random sequences compare to traditional pseudo-random sequences in Monte Carlo integration tasks. The focus is on evaluating how well each sequence type covers a 2D unit hypercube and how that impacts integration accuracy and variance. The goal is to provide insight into which sampling method is more effective for numerical simulations, especially those used in scientific and engineering applications.
 
-The primary objective of this research is to compare the performance of quasi-random sequences (Sobol, Halton, and Faure) with traditional pseudo-random sequences in terms of their uniformity and effectiveness in Monte Carlo integration tasks. The goal is to demonstrate the advantages of using quasi-random sequences by analyzing their discrepancy values and visualizing their distribution in a unit hypercube.
+---
 
-This study addresses the following questions:
-1. How do Sobol, Halton, and Faure sequences compare with pseudo-random sequences in terms of uniformity of distribution?
-2. What is the impact of using quasi-random sequences on the accuracy and variance of Monte Carlo integration results?
-3. How do the discrepancy values of these sequences reflect their distribution characteristics and performance in simulations?
+## **2. Data Source**  
+This is a synthetic study. All data (random and quasi-random sequences) are generated programmatically within a 2D unit hypercube \([0, 1] \times [0, 1]\). Sequences include:
 
-By answering these questions, this research aims to provide a comprehensive comparison of these sequences, highlighting the benefits of quasi-random sequences for scientific and engineering applications that require reliable and uniform sampling methods.
+- **Sobol** (via `scipy.stats.qmc.Sobol`)  
+- **Halton** (via `scipy.stats.qmc.Halton`)  
+- **Faure** (via custom implementation)  
+- **Pseudo-Random** (via `numpy.random.rand`)
 
-## Methodology
+Each sequence contains 1,000 points and is used for both uniformity and integration comparisons.
 
-The methodology of this research involves generating and evaluating the performance of different types of sequences: Sobol, Halton, Faure, and pseudo-random sequences. The performance metrics include the discrepancy values and the accuracy of Monte Carlo integration results. The following steps outline the detailed methodology used in this study:
+---
 
-### Sequence Generation
+## **3. Data Cleaning & Preprocessing**  
+All sequences were generated cleanly within bounds, so minimal preprocessing was required. Preprocessing steps included:
 
-Four types of sequences were generated: Sobol, Halton, Faure, and pseudo-random sequences. Each sequence was generated within a 2-dimensional unit hypercube `[0, 1] x [0, 1]`.
+- Validating that all points fall within \([0, 1]^2\)  
+- Normalizing values where needed (e.g., Faure sequence)  
+- Ensuring consistent dimensionality and shape  
+- Applying each point set to the test function \(f(x, y) = x^2 + y^2\)
 
-- **Sobol Sequence**: Generated using the `scipy.stats.qmc.Sobol` class, which produces low-discrepancy sequences.
-- **Halton Sequence**: Generated using the `scipy.stats.qmc.Halton` class, which produces sequences based on different prime bases for each dimension.
-- **Faure Sequence**: Generated using a custom implementation to ensure values are normalized within the unit hypercube. This involves converting digits to a specific base and normalizing the sequence.
-- **Pseudo-Random Sequence**: Generated using `numpy.random.rand`, producing standard pseudo-random numbers within the unit hypercube.
+No missing data, outliers, or transformation issues were present.
 
-### Monte Carlo Integration
+---
 
-To evaluate the performance of these sequences, a simple Monte Carlo integration task was used. The function chosen for integration is `f(x, y) = x^2 + y^2`. For each sequence, the mean value of the function over 1,000 points generated within the unit hypercube was calculated.
+## **4. Exploratory Data Analysis (EDA)**  
 
-The Monte Carlo integration process for each sequence is as follows:
-1. Generate 1,000 points for each sequence.
-2. Apply the function `f(x, y) = x^2 + y^2` to each point.
-3. Compute the mean of the function values as the result of the Monte Carlo integration.
+### **Discrepancy Value Table**  
+Discrepancy measures how uniformly points are distributed. Lower values mean better coverage.
 
-### Discrepancy Calculation
+| Sequence Type           | Discrepancy Value |
+|-------------------------|-------------------|
+| Sobol Sequence          | 1.5929e-06        |
+| Halton Sequence         | 2.1981e-06        |
+| Faure Sequence          | 3.4823e-06        |
+| Pseudo-Random Sequence  | 1.0118e-03        |
 
-Discrepancy is a measure of how uniformly the points cover the unit hypercube. Lower discrepancy values indicate more uniform coverage. The `scipy.stats.qmc.discrepancy` function was used to calculate the discrepancy of each sequence.
+### **Monte Carlo Integration Values**  
+Results are based on averaging \(f(x, y) = x^2 + y^2\) over 1,000 samples. The expected value is \( \frac{2}{3} \approx 0.6667 \).
 
-The discrepancy calculation process is as follows:
-1. Generate 1,000 points for each sequence.
-2. Ensure all points lie within the unit hypercube by normalizing if necessary.
-3. Compute the discrepancy using the `scipy.stats.qmc.discrepancy` function.
+| Sequence Type           | Integration Result |
+|-------------------------|--------------------|
+| Sobol Sequence          | 0.666278           |
+| Halton Sequence         | 0.666328           |
+| Faure Sequence          | 0.665979           |
+| Pseudo-Random Sequence  | 0.654316           |
 
-### Visualization
+---
 
-To visually compare the distribution of points for each sequence, the 1,000 generated points for each sequence were plotted in a 2D scatter plot. This visual representation helps to intuitively understand the uniformity and distribution characteristics of each sequence.
+## **5. Modeling Approach**  
+Instead of training models, this project uses sampling methods as the "model" to evaluate their accuracy in numerical estimation.
 
-### Analysis and Comparison
+Steps included:
+- Generating 1,000 2D points per sequence  
+- Evaluating the integral \(f(x, y) = x^2 + y^2\) using the sample mean  
+- Calculating discrepancy to assess coverage uniformity
 
-Finally, the results of the Monte Carlo integration and discrepancy calculations for each sequence were compared. The accuracy and variance of the integration results, as well as the discrepancy values, were analyzed to draw conclusions about the performance of each sequence type.
+This allowed a controlled comparison of sampling efficiency.
 
-### Tools and Libraries
+---
 
-The following tools and libraries were used in this research:
-- **Python**: The primary programming language for implementing the sequence generation, Monte Carlo integration, and discrepancy calculations.
-- **NumPy**: Used for generating pseudo-random sequences and performing numerical operations.
-- **SciPy**: Used for generating Sobol and Halton sequences, as well as for discrepancy calculations.
-- **Matplotlib**: Used for plotting and visualizing the distribution of points for each sequence.
+## **6. Evaluation Metrics**
 
-This methodology ensures a comprehensive evaluation of the sequences in terms of both uniformity and effectiveness in Monte Carlo integration tasks.
+- **Discrepancy**: A statistical measure of uniformity across the hypercube  
+- **Integration Accuracy**: How close the sample mean of the test function is to the expected value  
+- **Variance (implicit)**: Assessed through consistency of results across sequences  
+- **Visual Uniformity**: Through 2D scatterplots of the sampled points
 
-## Results
+---
 
-In this section, the results of the comparison between quasi-random sequences (Sobol, Halton, and Faure) and pseudo-random sequences are presented. The evaluation metrics include the discrepancy values and the accuracy of Monte Carlo integration results. The findings are based on sequences generated within a 2-dimensional unit hypercube `[0, 1] x [0, 1]`, each containing 1,000 points.
+## **7. Outcome**
 
-### Discrepancy Values
-
-Discrepancy is a measure of how uniformly points cover the unit hypercube. Lower discrepancy values indicate more uniform coverage, which is desirable for reducing variance in Monte Carlo simulations. The discrepancy values for each sequence type are presented in the table below.
-
-| Sequence Type | Discrepancy Value       |
-|---------------|-------------------------|
-| Sobol Sequence| 1.5929e-06              |
-| Halton Sequence| 2.1981e-06             |
-| Faure Sequence| 3.4823e-06              |
-| Pseudo-Random Sequence| 1.0118e-03      |
-
-From this table, it is observed that the quasi-random sequences (Sobol, Halton, and Faure) have significantly lower discrepancy values compared to the pseudo-random sequence. This indicates that the quasi-random sequences provide more uniform coverage of the unit hypercube.
-
-### Monte Carlo Integration Results
-
-The performance of each sequence type in a Monte Carlo integration task using the function `f(x, y) = x^2 + y^2` was evaluated. The results of the integration, which represent the mean values of the function over 1,000 points, are presented in the table below.
-
-| Sequence Type      | Monte Carlo Integration Result |
-|--------------------|--------------------------------|
-| Sobol Sequence     | 0.666278                       |
-| Halton Sequence    | 0.666328                       |
-| Faure Sequence     | 0.665979                       |
-| Pseudo-Random Sequence| 0.654316                   |
-
-This table shows that the integration results for quasi-random sequences are closer to the expected value of `2/3 ≈ 0.6667` compared to the pseudo-random sequence. This indicates that quasi-random sequences provide more accurate integration results with lower variance.
-
-### Visual Comparison
-
-To visually compare the distribution of points, the 1,000 generated points for each sequence type were plotted in a 2D scatter plot. The figure below shows the combined plots for Sobol, Halton, Faure, and pseudo-random sequences.
+### **Visual Comparison of Sampling Distributions**  
+The figure below shows the 2D scatter plots of the 1,000 points generated for each sequence. It highlights the differences in distribution uniformity between quasi-random and pseudo-random sampling methods.
 
 ![Distribution of Points for Different Sequence Types](images/sequences.png)
 
-This figure illustrates that the quasi-random sequences (Sobol, Halton, and Faure) exhibit a more uniform distribution of points across the unit hypercube compared to the pseudo-random sequence. This visual evidence supports the discrepancy values and integration results, demonstrating the superior performance of quasi-random sequences.
+From visual inspection:
+- **Quasi-random sequences** (Sobol, Halton, Faure) appear more evenly spaced  
+- **Pseudo-random sequence** shows noticeable clustering and gaps
 
-### Summary of Results
+### **Accuracy and Uniformity Comparison**  
+- **Quasi-random sequences** consistently show:
+  - Lower discrepancy  
+  - Higher integration accuracy  
+  - More uniform point distribution
 
-The results of this study highlight the advantages of using quasi-random sequences over pseudo-random sequences for applications requiring uniform sampling. The key findings are:
-- Quasi-random sequences (Sobol, Halton, and Faure) have significantly lower discrepancy values compared to pseudo-random sequences, indicating more uniform coverage of the unit hypercube.
-- Monte Carlo integration results for quasi-random sequences are closer to the expected value, demonstrating higher accuracy and lower variance.
-- Visual comparison of point distributions confirms the superior uniformity of quasi-random sequences.
+- **Pseudo-random sequence** yields:
+  - Higher discrepancy  
+  - Underestimated integral  
+  - Visibly uneven coverage
 
-These findings suggest that quasi-random sequences are more suitable for scientific and engineering applications that require reliable and uniform sampling methods.
+---
+
+## **8. Tools Used**
+
+- **Python**: Core language  
+- **NumPy**: Numerical operations and pseudo-random generation  
+- **SciPy**: Sobol, Halton sequences and discrepancy analysis  
+- **Matplotlib**: Visualization of distributions  
+- **Custom Functions**: Faure sequence logic, integration functions
+
+---
+
+## **9. Business Impact / Use Case**
+
+This study supports more effective numerical estimation strategies in:
+
+- **Financial modeling** (e.g., pricing options with less variance)  
+- **Scientific simulations** (e.g., particle behavior)  
+- **Engineering problems** (e.g., design optimization)  
+- **Monte Carlo rendering** (e.g., reducing visual noise in CG applications)
+
+These findings highlight when and why to replace traditional pseudo-random sampling with structured, deterministic low-discrepancy methods.
